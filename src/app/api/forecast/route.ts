@@ -16,6 +16,7 @@ export async function GET(request: Request) {
     let lat: string | undefined = latParam ?? undefined
     let lon: string | undefined = lonParam ?? undefined
 
+    console.log("city", city)
     if(!lat || !lon) {
       if (!city) {
         return NextResponse.json(
