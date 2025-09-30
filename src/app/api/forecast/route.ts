@@ -1,3 +1,4 @@
+// /app/api/forecast/router.ts
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
@@ -6,7 +7,7 @@ export async function GET(request: Request) {
     const city = url.searchParams.get("city");
     const latParam = url.searchParams.get("lat");
     const lonParam = url.searchParams.get("lon");
-    const cntParam = url.searchParams.get("cnt") ?? '7'; //default = 7 days
+    // NOTE: The 'cnt' parameter is not used in the 5-day / 3-hour forecast endpoint.
     const apiKey = process.env.OPENWEATHER_API_KEY;
 
     if (!apiKey) {
@@ -16,8 +17,8 @@ export async function GET(request: Request) {
     let lat: string | undefined = latParam ?? undefined
     let lon: string | undefined = lonParam ?? undefined
 
-    console.log("city", city)
-    if(!lat || !lon) {
+    // Geocoding: if lat/lon are missing, convert city -> lat/lon
+    if (!lat || !lon) {
       if (!city) {
         return NextResponse.json(
           { error: 'Please provide `city` or both `lat` and `lon` query params' },
@@ -25,13 +26,13 @@ export async function GET(request: Request) {
         );
       };
 
-      // Geocoding: convert city -> lat/lon
       const geoRes = await fetch(
         `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(
           city
         )}&limit=1&appid=${apiKey}`
       )
       const geoJson = await geoRes.json()
+      
       if (!geoRes.ok || !Array.isArray(geoJson) || geoJson.length === 0) {
         return NextResponse.json({ error: 'City not found (geocoding failed)' }, { status: 404 })
       }
@@ -39,9 +40,10 @@ export async function GET(request: Request) {
       lon = String(geoJson[0].lon)
     };
 
-    // Build the daily forecast URL
-    const cnt = encodeURIComponent(cntParam)
-    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast/daily?lat=${lat}&lon=${lon}&cnt=${cnt}&units=metric&appid=${apiKey}`
+    // Build the 5-day / 3-hour forecast URL
+    // This is the correct endpoint for multi-day forecast data in the free tier
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+
 
     const fcRes = await fetch(forecastUrl)
     const fcJson = await fcRes.json()
@@ -58,7 +60,6 @@ export async function GET(request: Request) {
     return NextResponse.json(fcJson, {
       status: 200,
       headers: {
-        // allow CDN caching and stale-while-revalidate pattern
         'Cache-Control': 's-maxage=600, stale-while-revalidate=60'
       }
     })
