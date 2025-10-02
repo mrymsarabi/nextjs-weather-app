@@ -1,4 +1,3 @@
-// components/DarkToggle.tsx
 'use client'
 import { useEffect, useState } from 'react'
 import { Sun, Moon } from 'lucide-react';

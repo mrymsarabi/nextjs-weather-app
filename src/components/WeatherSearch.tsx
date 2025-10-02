@@ -1,8 +1,6 @@
-// components/WeatherSearch.tsx
 'use client'
 import { useState, useEffect, useCallback, useRef } from 'react';
 import ForecastDisplay from './ForecastDisplay'; 
-
 
 // 1. FIXED UTILITY: Simple Debounce Function with a 'cancel' method
 const debounce = (func: Function, delay: number) => {
@@ -130,46 +128,54 @@ export default function WeatherSearch () {
   };
   
   return (
-    <div className="w-full max-w-xl">
-      <form onSubmit={(e) => handleSearch(e)} className="flex gap-2 mb-4 relative">
+    <div className="w-full max-w-2xl"> 
+      <form onSubmit={(e) => handleSearch(e)} className="flex relative shadow-lg rounded-2xl"> {/* Added shadow and border-radius to form */}
         <input
           value={city}
           onChange={e => setCity(e.target.value)}
-          placeholder="Start typing a city name..."
-          className="flex-1 px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 dark:focus:ring-blue-600/50 transition-all"
+          placeholder="Search for a city, e.g., London..."
+          className="flex-1 px-5 py-3 text-lg rounded-l-2xl border-2 border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-4 focus:ring-blue-500/50 dark:focus:ring-blue-600/50 transition-all bg-white dark:bg-gray-800"
           disabled={loading}
           autoComplete="off"
         />
+        
         <button
           type="submit"
-          className="px-6 py-2 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
+          className="px-8 py-3 bg-blue-600 text-white font-semibold text-lg rounded-r-2xl hover:bg-blue-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]"
           disabled={loading}
         >
-          {loading ? 'Fetching...' : 'Search'}
+          {loading ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+              'Search'
+          )}
         </button>
 
-        {/* Suggestions Dropdown */}
         {suggestions.length > 0 && (
-          <ul className="absolute z-10 w-[calc(100%-100px)] top-full mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+          <ul className="absolute z-10 w-[calc(100%-120px)] top-full mt-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-2xl max-h-80 overflow-y-auto">
             {suggestions.map((s, index) => (
               <li
                 key={`${s.lat}-${s.lon}-${index}`}
                 onClick={() => handleSuggestionClick(s)}
-                className="p-3 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/40 text-sm border-b dark:border-gray-600 last:border-b-0"
+                className="p-3 px-5 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/40 text-base transition-colors border-b dark:border-gray-600 last:border-b-0"
               >
-                <span className='font-semibold'>{s.name}</span>
-                {s.state && `, ${s.state}`}
-                , <span className='text-gray-500 dark:text-gray-400'>{s.country}</span>
+                <span className='font-bold text-gray-800 dark:text-gray-100'>{s.name}</span>
+                {s.state && <span className='text-sm text-gray-500 dark:text-gray-400'> ({s.state})</span>}
+                , <span className='text-gray-500 dark:text-gray-400 text-sm'>{s.country}</span>
               </li>
             ))}
           </ul>
         )}
       </form>
 
-      {error && <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg mb-4 border border-red-300 dark:border-red-700">{error}</div>}
+      {error && <div className="mt-4 p-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 font-medium rounded-xl border border-red-300 dark:border-red-700 shadow-md">{error}</div>}
+      
       {data && <ForecastDisplay data={data} />}
+
       {!data && !error && (
-        <div className="text-sm text-gray-500 dark:text-gray-400 p-4 text-center">Try searching for a city above ✨</div>
+        <div className="text-base text-gray-500 dark:text-gray-400 p-8 text-center mt-6">
+          Enter a city above to see the 5-day weather forecast 👆
+        </div>
       )}
     </div>
   )
