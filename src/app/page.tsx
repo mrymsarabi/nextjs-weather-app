@@ -1,4 +1,3 @@
-import DarkToggle from "@/components/DarkToggle";
 import WeatherSearch from "@/components/WeatherSearch";
 
 export default function Home() {
